@@ -78,7 +78,11 @@ async function runCycle({ publish = true, source = 'manual' } = {}) {
       (lvl, msg, extra) => logger[lvl](msg, extra)
     );
     if (viaGql === false && found.length === 0) {
-      throw new Error('Nenhuma transmissao encontrada: API e fallback do diretorio falharam.');
+      const err = new Error('Nenhuma transmissao encontrada: API e fallback do diretorio falharam.');
+      // Codigo de erro classificado: ambientes sem acesso ao CAM4 (ex.: nuvem
+      // com IP de datacenter bloqueado) tratam esse caso como resultado neutro.
+      err.code = 'DISCOVERY_UNAVAILABLE';
+      throw err;
     }
     logger.info(`Descoberta concluida: ${found.length} salas unicas ao vivo (API GraphQL: ${viaGql ? 'ok' : 'falhou'}${apiFailures ? `, ${apiFailures} paginas com falha` : ''})`);
     summary.discovered = found.length;
