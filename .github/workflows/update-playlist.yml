@@ -1,0 +1,60 @@
+name: Atualiza playlist CAM4
+
+# Roda na nuvem do GitHub a cada 15 minutos e tambem sob demanda
+# (aba Actions -> "Atualiza playlist CAM4" -> Run workflow).
+on:
+  schedule:
+    - cron: '*/15 * * * *' # a cada 15 min (UTC); o GitHub pode atrasar alguns minutos
+  workflow_dispatch:
+
+# Token interno do Actions com permissao para commitar a playlist.
+permissions:
+  contents: write
+
+# Evita duas execucoes simultaneas do mesmo ciclo.
+concurrency:
+  group: cam1-playlist-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    name: Descobrir, validar e publicar
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Ciclo completo (descoberta, validacao, publicacao)
+        env:
+          # Publicacao usa o token interno do Actions (nao exige token pessoal)
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPO: ${{ github.repository }}
+          GITHUB_BRANCH: main
+          GITHUB_FILE_PATH: cam1.m3u
+          CAM4_GENDERS: female,male,transgender
+          CAM4_PAGE_SIZE: '100'
+          CAM4_MAX_PAGES: '25'
+          CAM4_MAX_ROOMS: '0'
+          CAM4_INCLUDE_PRIVATE: 'false'
+          VALIDATE_LINKS: 'true'
+          VALIDATE_CONCURRENCY: '8'
+          VALIDATE_TIMEOUT_MS: '15000'
+          LOG_LEVEL: info
+        run: |
+          node src/cycle.js
+          code=$?
+          if [ "$code" -eq 2 ]; then
+            echo "Ciclo concluido e publicado; ha links invalidos nao incluidos (exit 2 tratado como sucesso)."
+            exit 0
+          fi
+          exit "$code"
+
+      - name: Ultimas linhas do log
+        if: always()
+        run: tail -n 40 data/logs/cam1.log 2>/dev/null || true
