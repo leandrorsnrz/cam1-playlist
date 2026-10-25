@@ -53,6 +53,18 @@ jobs:
             echo "Ciclo concluido e publicado; ha links invalidos nao incluidos (exit 2 tratado como sucesso)."
             exit 0
           fi
+          if [ "$code" -eq 3 ]; then
+            {
+              echo "### Atualizacao da playlist (CAM4)"
+              echo ""
+              echo "- Descoberta indisponivel neste runner: o CAM4 normalmente bloqueia acesso"
+              echo "  vindo de IPs de datacenter (GitHub Actions/Azure)."
+              echo "- Nada foi publicado nesta execucao; a playlist segue sendo atualizada pelo"
+              echo "  sistema local a cada 15 minutos."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::notice::CAM4 nao respondeu a partir deste runner (bloqueio tipico de datacenter). Nada foi publicado; o sistema local segue atualizando a playlist."
+            exit 0
+          fi
           exit "$code"
 
       - name: Ultimas linhas do log
