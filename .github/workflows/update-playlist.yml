@@ -47,8 +47,12 @@ jobs:
           VALIDATE_TIMEOUT_MS: '15000'
           LOG_LEVEL: info
         run: |
+          # O Actions roda com set -e: um exit != 0 do node abortaria o script
+          # antes de chegarmos aos tratamentos abaixo. Desligamos -e aqui.
+          set +e
           node src/cycle.js
           code=$?
+          set -e
           if [ "$code" -eq 2 ]; then
             echo "Ciclo concluido e publicado; ha links invalidos nao incluidos (exit 2 tratado como sucesso)."
             exit 0
