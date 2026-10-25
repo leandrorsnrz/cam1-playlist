@@ -12,6 +12,8 @@
  *   0 = sucesso
  *   1 = erro generico
  *   2 = ciclo concluido, mas existem links invalidos nao publicados
+ *   3 = descoberta indisponivel (ex.: CAM4 bloqueia IP de datacenter);
+ *       nada foi publicado e o sistema local segue atualizando
  *
  * Ideal para o Agendador de Tarefas do Windows quando nao se deseja
  * manter o servidor da interface rodando.
@@ -50,6 +52,12 @@ runCycle({ publish: !checkOnly, source: 'cli' })
     process.exit(0);
   })
   .catch((err) => {
+    if (err && err.code === 'DISCOVERY_UNAVAILABLE') {
+      console.error(`AVISO: ${err.message}`);
+      console.error('O ambiente nao conseguiu consultar o CAM4 (tipico em IPs de datacenter).');
+      console.error('Nada foi publicado; o sistema local continua atualizando a playlist.');
+      process.exit(3);
+    }
     console.error(`ERRO: ${err.message}`);
     process.exit(1);
   });
