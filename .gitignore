@@ -1,0 +1,7 @@
+node_modules/
+.env
+data/
+*.log
+*.log.1
+cam1.m3u
+cam1.m3u.tmp

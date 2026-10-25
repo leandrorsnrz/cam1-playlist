@@ -1,0 +1,16 @@
+{
+  "name": "cam1-playlist-system",
+  "version": "1.0.0",
+  "description": "Sistema automatico de playlist M3U para transmissoes ao vivo do CAM4, com publicacao no GitHub",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "cycle": "node src/cycle.js",
+    "check": "node src/cycle.js --check",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT"
+}
